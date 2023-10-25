@@ -2,21 +2,32 @@ import java.util.Scanner;
 
 public class MathGame {
 
+    private int highestScore;
+
+    private int winstreak;
+    private int losestreak;
     private Player player1;
     private Player player2;
+    private Player player3;
     private Player currentPlayer;
     private Player winner;
+    private Player previousWinner;
     private boolean gameOver;
     private Scanner scanner;
 
     // create MathGame object
-    public MathGame(Player player1, Player player2, Scanner scanner) {
+    public MathGame(Player player1, Player player2, Player player3, Scanner scanner) {
         this.player1 = player1;
         this.player2 = player2;
+        this.player3 = player3;
         this.scanner = scanner;
+        highestScore = 0;
+        winstreak = 1;
+        losestreak = 0;
         currentPlayer = null; // will get assigned at start of game
         winner = null; // will get assigned when a Player wins
         gameOver = false;
+        previousWinner = null;
     }
 
     // ------------ PUBLIC METHODS (to be used by client classes) ------------
@@ -37,10 +48,10 @@ public class MathGame {
                 System.out.println("Correct!");
                 currentPlayer.incrementScore();  // this increments the currentPlayer's score
                 swapPlayers();  // this helper method (shown below) sets currentPlayer to the other Player
+                losestreak = 0;
             } else {
                 System.out.println("INCORRECT!");
-                gameOver = true;
-                determineWinner();
+                losingStreak();
             }
         }
     }
@@ -51,6 +62,7 @@ public class MathGame {
         System.out.println("Current Scores:");
         System.out.println(player1.getName() + ": " + player1.getScore());
         System.out.println(player2.getName() + ": " + player2.getScore());
+        System.out.println(player3.getName() + ": " + player3.getScore());
         System.out.println("--------------------------------------");
     }
 
@@ -58,6 +70,8 @@ public class MathGame {
     public void resetGame() {
         player1.reset(); // this method resets the player
         player2.reset();
+        player3.reset();
+        losestreak = 0;
         gameOver = false;
         currentPlayer = null;
         winner = null;
@@ -67,11 +81,13 @@ public class MathGame {
 
     // randomly chooses one of the Player objects to be the currentPlayer
     private void chooseStartingPlayer() {
-        int randNum = (int) (Math.random() * 2) + 1;
+        int randNum = (int) (Math.random() * 3) + 1;
         if (randNum == 1) {
             currentPlayer = player1;
-        } else {
+        } else if (randNum == 2) {
             currentPlayer = player2;
+        } else {
+            currentPlayer = player3;
         }
     }
 
@@ -114,6 +130,8 @@ public class MathGame {
     private void swapPlayers() {
         if (currentPlayer == player1) {
             currentPlayer = player2;
+        } else if (currentPlayer == player2) {
+            currentPlayer = player3;
         } else {
             currentPlayer = player1;
         }
@@ -123,8 +141,44 @@ public class MathGame {
     private void determineWinner() {
         if (currentPlayer == player1) {
             winner = player2;
+        } else if (currentPlayer == player2) {
+            winner = player3;
         } else {
             winner = player1;
         }
+    }
+
+    private void losingStreak() {
+        if (losestreak == 1) {
+            gameOver = true;
+            determineWinner();
+        } else {
+            losestreak++;
+            swapPlayers();
+        }
+    }
+
+    public void winningStreak() {
+        if (winner == previousWinner) {
+            winstreak++;
+        } else {
+            winstreak = 1;
+        }
+        System.out.println(winner.getName() + " has won " + winstreak + " game(s) in a row!");
+    }
+
+    public void highScore() {
+        int p1FinalScore = player1.getScore();
+        int p2FinalScore = player2.getScore();
+        int p3FinalScore = player3.getScore();
+
+        if(p1FinalScore > highestScore) {
+            highestScore = p1FinalScore;
+        } if(p2FinalScore > highestScore) {
+            highestScore = p2FinalScore;
+        } if(p3FinalScore > highestScore) {
+            highestScore = p3FinalScore;
+        }
+        System.out.println("High Score: " + highestScore);
     }
 }
